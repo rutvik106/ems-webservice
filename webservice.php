@@ -1,70 +1,135 @@
 <?php
 
 require_once("../lib/report-functions.php");
-
 require_once('../lib/cg.php');
 require_once('../lib/bd.php');
 require_once('../lib/common.php');
-
 require_once('../lib/adminuser-functions.php');
-
 require_once ('../lib/follow-up-functions.php');
 require_once ('../lib/follow-up-type-functions.php');
+require_once ('../lib/sub-category-functions.php');
+require_once ('../lib/rel-attribute-functions.php');
+require_once ('../lib/prefix-functions.php');
+require_once ('../lib/customer-type-functions.php');
+require_once ('../lib/product-unit-functions.php');
+require_once ('../lib/enquiry-group-functions.php');
+require_once ('../lib/lead-functions.php');
+require_once("../lib/rel-enquiry-group-functions.php");
+require_once("../lib/quantity-functions.php");
 
 
 switch($_POST["method"]){
 
+	case 'get_add_new_enquiry_data':
+
+	$arrayName = array('units' => listUnits(),'enquiry_type' => listCustomerTypes(),'enquiry_group' => listEnquiryGroups(),'prefix' => listPrefix());
+
+	echo json_encode(array('response'=>$arrayName));
+
+	break;
+
+	case 'add_new_enquiry':
+
+	if(isset($_SESSION['EMSadminSession']['admin_rights']) && (in_array(2,$admin_rights) || in_array(7,					$admin_rights)))
+	{   
+
+		$attribute_name_array=json_decode($_POST['attribute_name_array'],true);
+		$mobile_no=json_decode($_POST['mobile_no']);
+		$quantity_id=json_decode($_POST['quantity_id']);
+		$product_id=json_decode($_POST['product_id']);
+	    $mrp_array=json_decode($_POST['mrp']);
+		$unit_id=json_decode($_POST['unit_id']);
+		
+		$enquiry_group_id=explode(",", $_POST['enquiry_group_id']); 
+
+		$result=insertLead($_POST["prefix_id"], $_POST["customer_name"], $product_id, $mrp_array, $unit_id, $quantity_id,$attribute_name_array, $mobile_no, $_POST["email_id"], $_POST["discussion"], $_POST["customer_type_id"], $_POST["refrence"], $_POST["reminder_date"]. " ".$_POST["reminder_time"], $_POST['enquiry_date'], $_POST["budget"],$_POST["customer_id"], $_POST["city"], $_POST["customer_area"], $_POST["km"], $_POST["sms_status"], $enquiry_group_id);
+		
+		if(is_numeric($result) && is_numeric($_POST["customer_id"]))
+		{
+			$response=array("status"=>"1","message"=>"New Enquiry successfully added!");
+			die(json_encode(array("response"=>$response)));
+		}
+		else if(is_numeric($result))
+		{
+			$response=array("status"=>"1","message"=>"New Customer successfully added!");
+			die(json_encode(array("response"=>$response)));
+		}
+		else{
+			$response=array("status"=>"0","message"=>"Invalid Input OR Duplicate Entry!");
+			die(json_encode(array("response"=>$response)));
+
+		}
+
+		exit;
+	}
+	else
+	{	
+		$response=array("status"=>"0","message"=>"Authentication Failed! Not enough access rights!");
+		die(json_encode(array("response"=>$response)));
+	}
+
+	break;
+
+	case 'get_attributes_from_subcat_id':
+
+	$array = array_values(getAttributesFromSubCatId($_POST['sub_cat_id']));
+
+	echo json_encode($array);
+
+	break;
+
+
 	case 'add_new_follow_up':
 
-		if(isset($_SESSION['EMSadminSession']['admin_rights']) && (in_array(2,$admin_rights) || in_array(7,					$admin_rights)))
-			{
-				$enquiry_id=$_POST["enquiry_id"];
-				$enquiry_id=clean_data($enquiry_id);
-				
-				
-				
-			$result=insertFollowUp($enquiry_id, $_POST["followUpDiscussion"], $_POST["next_follow_up_date"]. " ".$_POST["next_follow_up_time"], $_POST["sms_status"], $_POST["follow_up_type_id"]);
-				
-				if($result=="success")
-				{
-					$response=array("status"=>"1","message"=>"Follow Up successfully added!");
-					die(json_encode(array("response"=>$response)));
-				}
-				else
-				{					
-					$response=array("status"=>"0","message"=>"Invalid Input OR Duplicate Entry!");
-					die(json_encode(array("response"=>$response)));
-				}
-				
-			}
-			else
-			{	
-				$response=array("status"=>"0","message"=>"Authentication Failed! Not enough access rights!");
-				die(json_encode(array("response"=>$response)));
-			}
+	if(isset($_SESSION['EMSadminSession']['admin_rights']) && (in_array(2,$admin_rights) || in_array(7,					$admin_rights)))
+	{
+		$enquiry_id=$_POST["enquiry_id"];
+		$enquiry_id=clean_data($enquiry_id);
+
+
+
+		$result=insertFollowUp($enquiry_id, $_POST["followUpDiscussion"], $_POST["next_follow_up_date"]. " ".$_POST["next_follow_up_time"], $_POST["sms_status"], $_POST["follow_up_type_id"]);
+
+		if($result=="success")
+		{
+			$response=array("status"=>"1","message"=>"Follow Up successfully added!");
+			die(json_encode(array("response"=>$response)));
+		}
+		else
+		{					
+			$response=array("status"=>"0","message"=>"Invalid Input OR Duplicate Entry!");
+			die(json_encode(array("response"=>$response)));
+		}
+
+	}
+	else
+	{	
+		$response=array("status"=>"0","message"=>"Authentication Failed! Not enough access rights!");
+		die(json_encode(array("response"=>$response)));
+	}
 
 	break;
 
 	case 'add_customer':
 
-		if(isset($_SESSION['EMSadminSession']['admin_rights']) && (in_array(2,$admin_rights) || in_array(7,					$admin_rights)))
-		{ 
-			$mobile_no=json_decode($_POST["mobile_no"]);
+	if(isset($_SESSION['EMSadminSession']['admin_rights']) && (in_array(2,$admin_rights) || in_array(7,					$admin_rights)))
+	{ 
+		$mobile_no=json_decode($_POST["mobile_no"]);
 
-			$result=insertCustomer($_POST["customer_name"], $_POST["email_id"], $mobile_no, $_POST["prefix_id"]);
+		$result=insertCustomer($_POST["customer_name"], $_POST["email_id"], $mobile_no, $_POST["prefix_id"]);
 
-			if(is_numeric($result))
-			{
-				$response=array("status"=>"1","message"=>"Customer added successfully");
-				die(json_encode(array("response"=>$response)));
-			}
-			else
-			{
-				$response=array("status"=>"0","message"=>"Failed to add New Customer");
-				die(json_encode(array("response"=>$response)));
-			}
-
+		if(is_numeric($result))
+		{
+			$response=array("status"=>"1","message"=>"Customer added successfully");
+			die(json_encode(array("response"=>$response)));
 		}
+		else
+		{
+			$response=array("status"=>"0","message"=>"Failed to add New Customer");
+			die(json_encode(array("response"=>$response)));
+		}
+
+	}
 
 	break;
 
@@ -174,6 +239,14 @@ switch($_POST["method"]){
 	}	
 
 	break;
+
+
+	case get_product_dropdown_data:
+
+	echo json_encode(listSubCategories());
+
+	break;
+
 
 	default: echo "invalid method";
 
