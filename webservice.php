@@ -20,6 +20,47 @@ require_once("../lib/quantity-functions.php");
 
 switch($_POST["method"]){
 
+	case 'get_follow_up_view':
+
+	$enquiry_form_id=$_POST['enquiry_id'];
+
+	$enquiry=getEnquiryById($enquiry_form_id);
+
+	$customer_id =$enquiry["customer_id"]; //$enquiryDetails['customer_id'];
+
+	//echo json_encode($enquiry);
+
+	$root=array( "enquiry"=>$enquiry,
+							"customer"=>getCustomerById($customer_id),
+							"contact"=>getCustomerContactNo($customer_id),
+							"follow_up_details"=>getFollowUpDetailsByEnquiryId($enquiry_form_id));
+	
+	echo json_encode($root);
+	
+	//echo json_encode(getExtraCustomerDetailsById($customer_id));
+
+	//echo json_encode(getCustomerById($customer_id));
+
+	
+	//echo json_encode(getFollowUpDetailsByEnquiryId($enquiry_form_id));
+
+	
+	//echo json_encode(getVisitDetailsByEnquiryId($enquiry_form_id));
+
+	
+	//echo json_encode(getCloseLeadByEnquiryId($enquiry_form_id));
+
+	
+	//echo json_encode(getRelSubCatEnquiryFromEnquiryId($enquiry_form_id));
+
+	
+	//echo json_encode(getNotesByEnquiryId($enquiry_form_id));
+
+	
+	//echo json_encode(getBookingFormByEnquiryId($enquiry_form_id));
+
+	break;
+
 	case 'get_add_new_enquiry_data':
 
 	$arrayName = array('units' => listUnits(),'enquiry_type' => listCustomerTypes(),'enquiry_group' => listEnquiryGroups(),'prefix' => listPrefix());
@@ -257,8 +298,8 @@ switch($_POST["method"]){
 function EMIPaymentDatesComparatorForEmiReports($a,$b){
 	$aEMIDate=$a['next_follow_up_date'];
 	$bEMIDate=$b['next_follow_up_date'];
-	$aEMIDate_array = explode("^", $aEMIDate);
-	$bEMIDate_array = explode("^", $bEMIDate);
+	$aEMIDate_array = explode(" ", $aEMIDate);
+	$bEMIDate_array = explode(" ", $bEMIDate);
 	$aEMIDate = trim($aEMIDate_array[0]);
 	$bEMIDate = trim($bEMIDate_array[0]);
 	$aEMIDate = str_replace('/', '-', $aEMIDate);
