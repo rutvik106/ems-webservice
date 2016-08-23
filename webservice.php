@@ -62,6 +62,36 @@ switch($_POST["method"]){
 
 
 
+	$follow_up_details=getFollowUpDetailsByEnquiryId($enquiry_form_id);
+
+	$final_follow_up_details=array();
+
+	foreach ($follow_up_details as $single_follow_up) {
+		
+
+		$follow_up_type_id = $single_follow_up['follow_up_type_id'];
+		if($follow_up_type_id!=NULL)
+		{
+			$follow_up_type_details = getFollowUpTypeById($follow_up_type_id);
+			$single_follow_up["follow_up_type"] =$follow_up_type_details['follow_up_type'];
+		}
+		else
+		{
+			$single_follow_up["follow_up_type"] = "-";
+		}
+
+
+		$adminId = $single_follow_up['created_by'];
+		$adminNameArray = getAdminUserByID($adminId);
+		$adminName = $adminNameArray['admin_name'];
+		$single_follow_up["handled_by"] =$adminName; 
+
+		$single_follow_up["date_added"]=date('d/m/Y H:i:s',strtotime($single_follow_up['date_added']));
+
+		array_push($final_follow_up_details, $single_follow_up);
+
+	}
+
 
 	$subCategory = getSubCatFromEnquiryId($enquiry_form_id);
 	if(is_numeric($subCategory[0][0]))
@@ -214,7 +244,7 @@ switch($_POST["method"]){
 		"enquiry"=>$enquiry,
 		"customer"=>$customer_detail_array,
 		"contact"=>getCustomerContactNo($customer_id),
-		"follow_up_details"=>getFollowUpDetailsByEnquiryId($enquiry_form_id),
+		"follow_up_details"=>$final_follow_up_details,
 		"product_details"=>$product_details,
 		"enquiry_details"=>$enquiry_details);
 
