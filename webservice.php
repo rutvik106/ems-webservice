@@ -21,6 +21,142 @@ require_once("../lib/prefix-functions.php");
 
 switch($_POST["method"]){
 
+
+	case 'search_customer':
+
+
+		$enquiry_id = $_POST['enquiry_id'];
+		$mobile_number = $_POST['mobile_no'];
+		$name = $_POST['name'];
+		$email = $_POST['email'];
+		
+		if(validateForNull($email) || validateForNull($mobile_number) || validateForNull($name) || validateForNull($enquiry_id))
+			{						
+					if(validateForNull($name))
+					{
+					$customer_id=getCustomerIdFromCustomerName($name);
+					if(checkForNumeric($customer_id))
+					{
+						unset($_SESSION['search']);
+						echo json_encode(array("response"=>array("result"=>$customer_id)));
+						exit;
+					}
+					else if(is_array($customer_id))
+					{
+						$searchedCustomer=array();
+						foreach($customer_id as $file_id)
+						{
+							
+								$customer=getCustomerById($file_id['customer_id']);
+							    $contactNos = getCustomerContactNo($file_id['customer_id']);
+								$searchedCustomer[]=array("customer_id"=>$file_id['customer_id'],
+									"customer"=>$customer,
+									"customer_contact"=>$contactNos);
+						}
+			
+						echo json_encode(array("response"=>array("result"=>$searchedCustomer)));
+						exit;
+					}
+					else{
+						unset($_SESSION['search']);
+						echo json_encode(array("response"=>array("result"=>"invalid")));
+						exit;
+						
+						}	
+					}
+				else if(validateForNull($mobile_number))
+				{
+					
+				
+					$customer_id=getCustomerIdFromContactNo($mobile_number);
+					
+					if(checkForNumeric($customer_id))
+					{
+						unset($_SESSION['search']);
+						echo json_encode(array("response"=>array("result"=>$customer_id)));
+						exit;
+					}
+					
+					else{
+						unset($_SESSION['search']);
+						echo json_encode(array("response"=>array("result"=>"invalid contact number")));
+						exit;
+						
+						}	
+				}
+				
+				else if(validateForNull($enquiry_id))
+				{
+					
+					
+				
+					$customer_id = getCustomerByUniqueEnquiryId($enquiry_id);
+					
+					if(checkForNumeric($customer_id))
+					{
+						unset($_SESSION['search']);
+						echo json_encode(array("response"=>array("result"=>$customer_id)));
+						exit;
+					}
+					
+					else{
+						unset($_SESSION['search']);
+						echo json_encode(array("response"=>array("result"=>"invalid enquiry id")));
+						exit;
+						
+						}	
+				}
+				
+				else if(validateForNull($email))
+				{
+					
+				
+					$customer_id=getCustomerIdFromEmail($email);
+					
+					if(checkForNumeric($customer_id))
+					{
+						unset($_SESSION['search']);
+						echo json_encode(array("response"=>array("result"=>$customer_id)));
+						exit;
+					}
+					
+					else{
+						unset($_SESSION['search']);
+						echo json_encode(array("response"=>array("result"=>"invalid email id")));
+						exit;
+						
+						}	
+				}
+								
+			}
+			else
+			{	
+				echo json_encode(array("response"=>array("result"=>"minimum one field require")));
+				exit;
+			}
+		
+
+
+	break;
+
+
+	case 'get_customer_names':
+	
+	$sql = "SELECT customer_name FROM ems_customer WHERE customer_name LIKE '%".$_REQUEST['term']."%'";
+	$result=dbQuery($sql);
+	$resultArray=dbResultToArray($result);
+	foreach ($resultArray as $r) 
+	{
+		$results[] = array('label' => $r['customer_name']);
+	}
+
+
+	
+	echo json_encode($results);
+
+	break;
+
+
 	case 'get_follow_up_view':
 
 	$enquiry_form_id=$_POST['enquiry_id'];
