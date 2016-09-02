@@ -609,7 +609,7 @@ switch($_POST["method"]){
 
 	$admin_id=$_SESSION['EMSadminSession']['admin_id'];
 	
-	$upcomming=viewFollowUps(getTodaysDate(),null,null,null,null,null,null,null,null,null,null,null,null,$admin_id);
+	$upcomming=viewFollowUpsWidget();
 
 	uasort($upcomming, "EMIPaymentDatesComparatorForEmiReports");
 
@@ -629,7 +629,7 @@ switch($_POST["method"]){
 	}	
 
 
-	$expired=viewFollowUps(null,getDateBeforeDaysFromTodaysDate(1),null,null,null,null,null,null,null,null,null,null,null,$admin_id);
+	$expired=viewExpiredFollowUpsWidget();
 
 	uasort($expired, "EMIPaymentDatesComparatorForEmiReports");
 
