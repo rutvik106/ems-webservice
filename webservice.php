@@ -608,22 +608,14 @@ switch($_POST["method"]){
 	case "get_follow_up":
 
 	$admin_id=$_SESSION['EMSadminSession']['admin_id'];
-	$data=viewFollowUps(getTodaysDate(),null,null,null,null,null,null,null,null,null,null,null,null,$admin_id);
+	
+	$upcomming=viewFollowUps(getTodaysDate(),null,null,null,null,null,null,null,null,null,null,null,null,$admin_id);
 
+	uasort($upcomming, "EMIPaymentDatesComparatorForEmiReports");
 
+	$new_upcomming = array();
 
-
-	//echo $data["next_follow_up_date"];
-
-	//$data["discussion"]=$exp[1];
-
-	//print_r($data);
-
-	uasort($data, "EMIPaymentDatesComparatorForEmiReports");
-
-	$new_data = array();
-
-	foreach($data as $d)
+	foreach($upcomming as $d)
 	{
 		$exp=explode("^", $d["next_follow_up_date"]);
 
@@ -633,14 +625,30 @@ switch($_POST["method"]){
 		$handled_by = $exp1[1];
 		$d['discussion'] = $discussion;
 		$d['handled_by'] = $handled_by;
-		$new_data[] = $d;
+		$new_upcomming[] = $d;
 	}	
 
 
-	//print_r($new_data);
+	$expired=viewFollowUps(null,getDateBeforeDaysFromTodaysDate(1),null,null,null,null,null,null,null,null,null,null,null,$admin_id);
 
+	uasort($expired, "EMIPaymentDatesComparatorForEmiReports");
 
-	echo json_encode($new_data);
+	$new_expired = array();
+
+	foreach($expired as $d)
+	{
+		$exp=explode("^", $d["next_follow_up_date"]);
+
+		$exp1 = explode("#", $exp[1]);
+
+		$discussion = $exp1[0];
+		$handled_by = $exp1[1];
+		$d['discussion'] = $discussion;
+		$d['handled_by'] = $handled_by;
+		$new_expired[] = $d;
+	}
+
+	echo json_encode(array("upcoming"=>$new_upcomming,"expired"=>$new_expired));
 
 	break;
 
@@ -727,7 +735,7 @@ switch($_POST["method"]){
 	break;
 
 
-	case get_product_dropdown_data:
+	case 'get_product_dropdown_data':
 
 	echo json_encode(listSubCategories());
 
