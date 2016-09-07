@@ -517,12 +517,12 @@ switch($_POST["method"]){
 
 		if(is_numeric($result) && is_numeric($_POST["customer_id"]))
 		{
-			$response=array("status"=>"1","message"=>"New Enquiry successfully added!");
+			$response=array("status"=>"1","message"=>$result);
 			die(json_encode(array("response"=>$response)));
 		}
 		else if(is_numeric($result))
 		{
-			$response=array("status"=>"1","message"=>"New Customer successfully added!");
+			$response=array("status"=>"1","message"=>$result);
 			die(json_encode(array("response"=>$response)));
 		}
 		else{
