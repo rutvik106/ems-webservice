@@ -21,9 +21,29 @@ require_once("../lib/prefix-functions.php");
 require_once ("../lib/customer-extra-details-functions.php");
 require_once ("../lib/profession-functions.php");
 require_once ("../lib/data-from-functions.php");
+require_once ("../lib/close-lead-functions.php");
+require_once ("../lib/decline-reasons-functions.php");
+
 
 
 switch($_POST["method"]){
+
+	case 'close_lead':
+
+	//insertCloseLead($is_bought, $decline_reason, $note, $enquiry_form_id, $purchase_date, $tour_ending_date, $sms_status)
+	if($_POST['is_bought']==1){
+		echo insertCloseLead(1,-1,null,$_POST['enquiry_form_id'],$_POST['purchase_date'],$_POST['end_date'],$_POST['sms_status']);
+	}else if($_POST['is_bought']==2){
+		echo insertCloseLead(2,$_POST['decline_reason_id'],$_POST['note'],$_POST['enquiry_form_id'],null,null,$_POST['sms_status']);
+	}
+
+	break;
+
+	case 'get_decline_reasons':
+
+	echo json_encode(listReasons());
+
+	break;
 
 
 	case 'get_customer_details':
@@ -88,6 +108,7 @@ switch($_POST["method"]){
 		$handled_by = $adminDetails['admin_name'];
 
 		$singleCustomerEnquiryDetails=array(
+			"enquiry_form_id"=>$enquiry_form_id,
 			"enquiry_date"=>$enquiryDate,
 			"enquiry_for"=>$subCategory[0]["sub_cat_name"],
 			"enquiry_status"=>$enquiryStatus,
